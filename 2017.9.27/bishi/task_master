@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+import sklearn
+
+import random, time, queue
+from multiprocessing.managers import BaseManager
+
+task_queue = queue.Queue()# 发送任务的队列:
+result_queue = queue.Queue()# 接收结果的队列:
+
+class QueueManager(BaseManager):
+    pass
+
+QueueManager.register('get_task_queue', callable=lambda: task_queue)
+QueueManager.register('get_result_queue', callable=lambda: result_queue)# 把两个Queue都注册到网络上
+
+manager = QueueManager(address=('', 5000), authkey=b'abc')
+
+manager.start()# 启动Queue:
+
+task = manager.get_task_queue()# 获得通过网络访问的Queue对象:
+result = manager.get_result_queue()
+
+#关闭
+manager.shutdown()
+print('master exit.')
